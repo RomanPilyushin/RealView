@@ -1,0 +1,35 @@
+name: CI Test
+
+# Controls when the workflow will run
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Define the jobs that will be run
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the code from the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up the environment (for Java, Node.js, Python, etc. adjust accordingly)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      # Step 3: Install dependencies (adjust based on your project type)
+      - name: Install dependencies
+        run: ./gradlew build --no-daemon
+
+      # Step 4: Run tests
+      - name: Run tests
+        run: ./gradlew test --no-daemon

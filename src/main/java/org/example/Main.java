@@ -10,7 +10,7 @@ public class Main {
         shape.addPoint(new Point2D(0, 0)); // Closing the shape
 
         TheShapeFixer fixer = new TheShapeFixer();
-
+        
         System.out.println("Is the shape valid? " + fixer.isValid(shape));
 
         Shape2D invalidShape = new Shape2D();
