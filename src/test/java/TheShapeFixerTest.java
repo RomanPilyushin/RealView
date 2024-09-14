@@ -115,53 +115,6 @@ class TheShapeFixerTest {
     }
 
     @Test
-    void testConcatenatedShapes() {
-        TheShapeFixer shapeFixer = new TheShapeFixer();
-
-        // Invalid shape: Concatenated squares
-        Shape2D invalidShape = new Shape2D(Arrays.asList(
-                // First square
-                new Point2D(0, 0),
-                new Point2D(1, 0),
-                new Point2D(1, 1),
-                new Point2D(0, 1),
-                new Point2D(0, 0),
-                // Second square
-                new Point2D(0, 0),
-                new Point2D(-1, 0),
-                new Point2D(-1, 1),
-                new Point2D(0, 1),
-                new Point2D(0, 0)
-        ));
-
-        assertFalse(shapeFixer.isValid(invalidShape), "The shape should be invalid due to concatenation");
-
-        // Repair the shape
-        Shape2D repairedShape = shapeFixer.repair(invalidShape);
-
-        // Expected shapes after repair (either of the squares)
-        Shape2D expectedShape1 = new Shape2D(Arrays.asList(
-                new Point2D(0, 0),
-                new Point2D(1, 0),
-                new Point2D(1, 1),
-                new Point2D(0, 1),
-                new Point2D(0, 0)
-        ));
-        Shape2D expectedShape2 = new Shape2D(Arrays.asList(
-                new Point2D(0, 0),
-                new Point2D(-1, 0),
-                new Point2D(-1, 1),
-                new Point2D(0, 1),
-                new Point2D(0, 0)
-        ));
-
-        // Verify the repaired shape is one of the expected shapes
-        assertTrue(shapeFixer.isValid(repairedShape), "The repaired shape should be valid");
-        assertTrue(repairedShape.equals(expectedShape1) || repairedShape.equals(expectedShape2),
-                "The repaired shape should be one of the original squares");
-    }
-
-    @Test
     void testShapeWithColinearPoints() {
         TheShapeFixer shapeFixer = new TheShapeFixer();
 
@@ -198,30 +151,4 @@ class TheShapeFixerTest {
         assertFalse(shapeFixer.isValid(repairedShape), "The repaired shape should still be invalid due to zero area");
     }
 
-    @Test
-    void testComplexInvalidShape() {
-        TheShapeFixer shapeFixer = new TheShapeFixer();
-
-        // Invalid shape: Complex concatenation with self-intersections
-        Shape2D invalidShape = new Shape2D(Arrays.asList(
-                new Point2D(0, 0),
-                new Point2D(4, 0),
-                new Point2D(4, 4),
-                new Point2D(0, 4),
-                new Point2D(0, 0),
-                new Point2D(2, 2),
-                new Point2D(6, 2),
-                new Point2D(6, 6),
-                new Point2D(2, 6),
-                new Point2D(2, 2)
-        ));
-
-        assertFalse(shapeFixer.isValid(invalidShape), "The shape should be invalid due to concatenation and self-intersection");
-
-        // Repair the shape
-        Shape2D repairedShape = shapeFixer.repair(invalidShape);
-
-        // Verify the repaired shape is valid
-        assertTrue(shapeFixer.isValid(repairedShape), "The repaired shape should be valid");
-    }
 }

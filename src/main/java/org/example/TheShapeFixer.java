@@ -177,7 +177,6 @@ public class TheShapeFixer {
      * The method handles various cases such as:
      * - Ensuring the shape is closed by adding the starting point at the end if necessary.
      * - Removing consecutive duplicate points.
-     * - Splitting concatenated shapes into valid sub-shapes.
      * - Removing repeated points (excluding the closing point).
      * - Constructing a convex hull from the unique points if necessary.
      *
@@ -186,6 +185,7 @@ public class TheShapeFixer {
      * @param shape The invalid {@link Shape2D} object to repair.
      * @return A valid {@link Shape2D} object if repair is possible; otherwise, an empty {@link Shape2D}.
      */
+
     public Shape2D repair(Shape2D shape) {
         // Create a modifiable copy of the points
         List<Point2D> points = new ArrayList<>(shape.getPoints());
@@ -201,50 +201,6 @@ public class TheShapeFixer {
         // If there are not enough points to form a polygon, return an empty shape
         if (points.size() < 4) {
             return new Shape2D();
-        }
-
-        // Attempt to split the shape at points where the starting point repeats (possible concatenated shapes)
-        List<Integer> splitIndices = new ArrayList<>();
-        splitIndices.add(0);
-        for (int i = 1; i < points.size() - 1; i++) {
-            if (points.get(i).equals(points.get(0))) {
-                splitIndices.add(i);
-            }
-        }
-        splitIndices.add(points.size());
-
-        // Initialize the best valid shape found during splitting
-        List<Point2D> bestShape = new ArrayList<>();
-
-        // Iterate over each sub-shape formed by splitting at repeated starting points
-        for (int k = 0; k < splitIndices.size() - 1; k++) {
-            int start = splitIndices.get(k);
-            int end = splitIndices.get(k + 1);
-            List<Point2D> subPoints = new ArrayList<>(points.subList(start, end));
-
-            // Skip sub-shapes that are too small to be valid
-            if (subPoints.size() < 4) continue;
-
-            // Ensure the sub-shape is closed
-            if (!subPoints.get(0).equals(subPoints.get(subPoints.size() - 1))) {
-                subPoints.add(subPoints.get(0));
-            }
-
-            // Remove consecutive duplicates within the sub-shape
-            subPoints = removeConsecutiveDuplicates(subPoints);
-
-            // Create a Shape2D object from the sub-points
-            Shape2D subShape = new Shape2D(subPoints);
-
-            // Check if the sub-shape is valid and larger than the current best shape
-            if (isValid(subShape) && subPoints.size() > bestShape.size()) {
-                bestShape = subPoints;
-            }
-        }
-
-        // If a valid sub-shape was found, return it
-        if (!bestShape.isEmpty()) {
-            return new Shape2D(bestShape);
         }
 
         // Remove any repeated points (excluding the first and last point for closure)
@@ -299,6 +255,7 @@ public class TheShapeFixer {
         // Cannot repair the shape, return an empty shape
         return new Shape2D();
     }
+
 
     /**
      * Removes consecutive duplicate points from a list of points.

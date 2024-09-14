@@ -41,9 +41,8 @@ Attempts to repair an invalid shape to make it valid. If it cannot be repaired, 
 
 1. **Closure Enforcement**: Adds the starting point at the end if the shape isn't already closed.
 2. **Consecutive Duplicate Removal**: Removes any consecutive duplicate points to simplify the shape.
-3. **Splitting Concatenated Shapes**: Identifies valid sub-shapes within concatenated shapes by splitting at repeated starting points.
-4. **Duplicate Point Removal**: Eliminates any repeated points to try forming a valid shape.
-5. **Convex Hull Construction**: As a last resort, constructs the convex hull of the unique points to form a valid shape using the `constructConvexHull` method.
+3. **Duplicate Point Removal**: Eliminates any repeated points to try forming a valid shape.
+4. **Convex Hull Construction**: As a last resort, constructs the convex hull of the unique points to form a valid shape using the `constructConvexHull` method.
 
 ### `edgesIntersect(Point2D p1, Point2D p2, Point2D q1, Point2D q2)`
 
