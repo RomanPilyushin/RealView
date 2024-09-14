@@ -22,7 +22,10 @@ public class Point2D {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        //return Objects.hash(x, y);
+        // Optimized version: Using prime number 31 for efficient hashing
+        return 31 * x + y;
+
     }
 
     @Override

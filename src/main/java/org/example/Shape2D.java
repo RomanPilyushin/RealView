@@ -34,7 +34,13 @@ public class Shape2D {
 
     @Override
     public int hashCode() {
-        return Objects.hash(points);
+        //return Objects.hash(points);
+        // Optimized version: Manual hash calculation for the list of points
+        int hash = 7;
+        for (Point2D point : points) {
+            hash = 31 * hash + point.hashCode();
+        }
+        return hash;
     }
 
     @Override

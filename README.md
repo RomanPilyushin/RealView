@@ -1,6 +1,6 @@
-# TheShapeFixer Class Explanation
+# RealView Explanation
 
-The `TheShapeFixer` class designed to validate and repair 2D shapes represented as sequences of connected points. It ensures that shapes meet specific criteria to be considered valid polygons and provides methods to correct invalid shapes when possible.
+The `TheShapeFixer` class is designed to validate and repair 2D shapes represented as sequences of connected points. It ensures that shapes meet specific criteria to be considered valid polygons and provides methods to correct invalid shapes when possible.
 
 ## Overview
 
@@ -8,6 +8,21 @@ The main functionalities of the `TheShapeFixer` class are:
 
 - **Validation**: Checking if a given shape is a valid polygon based on defined criteria.
 - **Repair**: Attempting to fix invalid shapes to make them conform to the required standards.
+
+## Project Structure
+
+- **[Point2D](https://github.com/RomanPilyushin/RealView/blob/master/src/main/java/org/example/Point2D.java)**: Represents a 2D point with `x` and `y` coordinates.
+- **[Shape2D](https://github.com/RomanPilyushin/RealView/blob/master/src/main/java/org/example/Shape2D.java)**: Represents a 2D shape consisting of a list of `Point2D` instances.
+- **[TheShapeFixer](https://github.com/RomanPilyushin/RealView/blob/master/src/main/java/org/example/TheShapeFixer.java)**: The main class responsible for validating and repairing shapes.
+- **[TheShapeFixerTest](https://github.com/RomanPilyushin/RealView/blob/master/src/test/java/TheShapeFixerTest.java)**: Unit tests for `TheShapeFixer` class, written using JUnit 5.
+
+## Continuous Integration (CI/CD)
+
+This project uses GitHub Actions for Continuous Integration. After each commit to the `main` branch, the project is compiled and all tests are executed using **JUnit 5** to ensure code quality and stability.
+
+## GitHub Page
+
+You can find the project page at [RealView](https://romanpilyushin.github.io/RealView/).
 
 ## Validation Criteria
 
