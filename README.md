@@ -1,6 +1,6 @@
 # TheShapeFixer Class Explanation
 
-The `TheShapeFixer` class is a utility in Java designed to validate and repair 2D shapes represented as sequences of connected points. It ensures that shapes meet specific criteria to be considered valid polygons and provides methods to correct invalid shapes when possible.
+The `TheShapeFixer` class designed to validate and repair 2D shapes represented as sequences of connected points. It ensures that shapes meet specific criteria to be considered valid polygons and provides methods to correct invalid shapes when possible.
 
 ## Overview
 
@@ -98,10 +98,6 @@ Checks if point `r` lies on the line segment defined by points `p` and `q`.
 
 Calculates the area of a polygon using the Shoelace formula.
 
-**Note:**
-
-- Returns the raw area value (twice the actual area) to avoid issues with integer division since all coordinates are integers.
-
 ### `constructConvexHull(List<Point2D> points)`
 
 Constructs the convex hull of a set of points using Graham's scan algorithm.
@@ -150,9 +146,35 @@ Detecting whether two edges intersect is essential for validating that a shape i
 
 ### Mathematical Background
 
-- The orientation calculation is based on the determinant of vectors formed by the points.
-- It effectively computes the area of the parallelogram formed by the vectors.
-- The sign of the determinant indicates the direction of the turn.
+The **orientation calculation** used in `TheShapeFixer` is based on the **determinant of vectors** formed by three points in 2D space. Here's a detailed explanation:
+
+#### Vectors and Determinants
+
+- Given three points `P(p_x, p_y)`, `Q(q_x, q_y)`, and `R(r_x, r_y)`, the orientation can be computed using the **determinant** of the vectors **PQ** and **QR**.
+- The determinant essentially measures the area of the parallelogram formed by these two vectors in 2D space.
+
+Mathematically, the determinant is computed as:
+
+$$ \text{det} = (q_x - p_x) \cdot (r_y - q_y) - (q_y - p_y) \cdot (r_x - q_x) $$
+
+
+This value gives insight into the direction of the turn from `P` to `R` about `Q`.
+
+#### Turn Direction Based on the Determinant
+
+1. **Clockwise (Right Turn)**: If the determinant is **positive**, it means the turn is **clockwise**.
+2. **Counterclockwise (Left Turn)**: If the determinant is **negative**, it means the turn is **counterclockwise**.
+3. **Colinear (No Turn)**: If the determinant is **zero**, the points are **colinear**, meaning they lie on a straight line.
+
+#### Parallelogram and Area
+
+- The determinant gives **twice the area** of the parallelogram formed by the vectors **PQ** and **QR**.
+- The **sign of the determinant** tells us about the relative orientation (clockwise or counterclockwise) of the three points:
+    - **Positive determinant**: Left turn (counterclockwise).
+    - **Negative determinant**: Right turn (clockwise).
+    - **Zero determinant**: Colinear points (no turn).
+
+This approach helps determine the orientation of edges or whether two edges intersect when testing shapes for validity.
 
 ### Example
 
@@ -174,4 +196,7 @@ Since `o1 != o2` and `o3 != o4`, the segments intersect.
 
 The `TheShapeFixer` class is a comprehensive utility for ensuring 2D shapes are valid polygons according to specific criteria. It uses fundamental concepts from computational geometry, such as orientations and convex hulls, to validate and repair shapes.
 
-By understanding the methods and logic behind this class, developers can effectively manage and correct shapes within their applications, ensuring data integrity and reliable geometric computations.
+
+
+
+
