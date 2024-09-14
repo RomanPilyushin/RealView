@@ -137,13 +137,9 @@ Detecting whether two edges intersect is essential for validating that a shape i
 - If the orientations of the combinations of points for both segments differ, the segments intersect.
 
 - Specifically, if:
-
-  java
-
-  Copy code
-
   `o1 != o2 && o3 != o4`
 
+  
   where `o1`, `o2`, `o3`, and `o4` are orientations calculated for the points of the segments.
 
 
