@@ -19,10 +19,15 @@ public class Shape2D {
         return points;
     }
 
+    public void addPoint(Point2D point) {
+        points.add(point);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Shape2D shape2D = (Shape2D) o;
         return Objects.equals(points, shape2D.points);
     }
@@ -31,11 +36,6 @@ public class Shape2D {
     public int hashCode() {
         return Objects.hash(points);
     }
-
-    public void addPoint(Point2D point) {
-        points.add(point);
-    }
-
 
     @Override
     public String toString() {

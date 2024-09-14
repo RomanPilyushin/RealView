@@ -3,8 +3,8 @@ package org.example;
 import java.util.Objects;
 
 public class Point2D {
-    int x;
-    int y;
+    public final int x;
+    public final int y;
 
     public Point2D(int x, int y) {
         this.x = x;
@@ -15,6 +15,7 @@ public class Point2D {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Point2D point2D = (Point2D) o;
         return x == point2D.x && y == point2D.y;
     }
