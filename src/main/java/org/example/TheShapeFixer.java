@@ -48,16 +48,25 @@ public class TheShapeFixer {
         }
 
         // Check for self-intersecting edges by examining all pairs of edges
+        //Outer Loop (Iterating Through Edges)
         for (int i = 0; i < n - 1; i++) {
+            //a1 and a2 represent the starting and ending points of the current edge
             Point2D a1 = points.get(i);
             Point2D a2 = points.get(i + 1);
 
+            //Inner Loop (Comparing Current Edge with Others)
             for (int j = i + 1; j < n - 1; j++) {
-                // Skip adjacent edges and edges sharing a vertex to avoid false positives
+                //This avoids a situation where two edges that are adjacent might technically "intersect"
+                // at a shared vertex, which is expected and not considered a self-intersection
+                //
+                //First condition - edge 1-2 doesn’t need to be checked against edge 2-3
+                //Second condition - skips the check for the case where the first edge and
+                // the last edge of a closed polygon share the same vertex (which they must).
                 if (Math.abs(i - j) <= 1 || (i == 0 && j == n - 2)) {
                     continue;
                 }
 
+                //b1 and b2 represent the starting and ending points of another edge
                 Point2D b1 = points.get(j);
                 Point2D b2 = points.get(j + 1);
 
@@ -114,17 +123,30 @@ public class TheShapeFixer {
      */
     private boolean edgesIntersect(Point2D p1, Point2D p2, Point2D q1, Point2D q2) {
         // Calculate orientations for the combinations of the points
+        //
+        // By computing the orientation of points (p1, p2, q1), and (p1, p2, q2)
+        // we determine if the points q1 and q2 lie on opposite sides of the line segment p1-p2.
+        // If they do, this is an indicator that the two line segments might intersect.
         int o1 = orientation(p1, p2, q1);
         int o2 = orientation(p1, p2, q2);
+
+        // Do the same for (q1, q2, p1) and (q1, q2, p2).
         int o3 = orientation(q1, q2, p1);
         int o4 = orientation(q1, q2, p2);
 
         // General case: If orientations are different, the segments intersect
+        // If the orientations o1 and o2 are different
+        // (i.e., q1 and q2 are on opposite sides of the segment p1-p2)
+        // If both conditions are true, the two line segments intersect at some point.
         if (o1 != o2 && o3 != o4) {
             return true;
         }
 
         // Special cases to handle colinear points
+        // (meaning the points lie on the same straight line)
+        //
+        //onSegment(p1, p2, q1) checks if the point q1 lies on the line segment p1-p2
+        // (i.e., q1 is collinear with p1 and p2 and also lies between them).
         if (o1 == 0 && onSegment(p1, p2, q1)) return true;
         if (o2 == 0 && onSegment(p1, p2, q2)) return true;
         if (o3 == 0 && onSegment(q1, q2, p1)) return true;
@@ -149,6 +171,10 @@ public class TheShapeFixer {
      */
     private int orientation(Point2D p, Point2D q, Point2D r) {
         // Calculate the determinant of the matrix formed by the points
+        //This expression is derived from the cross product of vectors pq and qr,
+        // which helps determine the orientation of the triplet (p,q,r)
+        // The formula essentially represents the area of the triangle formed by these three points.
+        // Subtracting the two gives the signed area of the triangle.
         long val = (long) (q.y - p.y) * (r.x - q.x) - (long) (q.x - p.x) * (r.y - q.y);
 
         if (val == 0) return 0; // Colinear
@@ -166,7 +192,17 @@ public class TheShapeFixer {
      * @return {@code true} if point r lies on the segment pq; {@code false} otherwise.
      */
     private boolean onSegment(Point2D p, Point2D q, Point2D r) {
-        // Check if r's coordinates are within the bounding rectangle of p and q
+        // This method assumes that the points p, q, and r are collinear,
+        // meaning they lie on the same straight line
+        //
+        // Let's say we have three collinear points:
+        // p(1, 2), q(4, 5), r(2, 3)
+        //
+        // We check if r lies on the segment p-q by verifying:
+        // r.x = 2 lies between p.x = 1 and q.x = 4.
+        // r.y = 3 lies between p.y = 2 and q.y = 5.
+        //
+        //Since both conditions are true, r is on the segment between p and q, so the method returns true.
         return r.x <= Math.max(p.x, q.x) && r.x >= Math.min(p.x, q.x) &&
                 r.y <= Math.max(p.y, q.y) && r.y >= Math.min(p.y, q.y);
     }
@@ -187,7 +223,6 @@ public class TheShapeFixer {
      */
 
     public Shape2D repair(Shape2D shape) {
-        // Create a modifiable copy of the points
         List<Point2D> points = new ArrayList<>(shape.getPoints());
 
         // Ensure the shape is closed by adding the starting point at the end if it's not already closed
@@ -207,11 +242,20 @@ public class TheShapeFixer {
         Set<Point2D> uniquePoints = new HashSet<>(points.subList(0, points.size() - 1));
 
         // If duplicates are found, attempt to remove them
+        // it means there were duplicates in the list (other than the closing point).
         if (uniquePoints.size() != points.size() - 1) {
+            //This will store the final list of unique points,
+            // in the same order they appear in the original list.
             List<Point2D> fixedPoints = new ArrayList<>();
+            // HashSet to track which points have already been added to fixedPoints.
+            // This prevents adding a duplicate point again
             Set<Point2D> seen = new HashSet<>();
 
             // Collect unique points
+            //
+            // The loop iterates through all points (except the closing point),
+            // and for each point p, it checks if p has already been added to seen.
+            // If p has not been seen before, it is added to both fixedPoints and seen.
             for (int i = 0; i < points.size() - 1; i++) {
                 Point2D p = points.get(i);
                 if (!seen.contains(p)) {
@@ -223,6 +267,8 @@ public class TheShapeFixer {
             // Ensure there are enough points to form a valid shape
             if (fixedPoints.size() >= 3) {
                 // Close the shape
+                // If there are enough points,
+                // the first point is added to the end of fixedPoints to close the shape.
                 fixedPoints.add(fixedPoints.get(0));
                 points = fixedPoints;
             } else {
@@ -238,6 +284,7 @@ public class TheShapeFixer {
         }
 
         // As a last resort, construct the convex hull of the unique points
+        // The convex hull is the smallest convex shape that can enclose all the points of the original shape
         List<Point2D> hull = constructConvexHull(new ArrayList<>(uniquePoints));
 
         // If the hull forms a valid shape, return it
@@ -270,6 +317,8 @@ public class TheShapeFixer {
         if (points.isEmpty()) return result;
 
         // Add the first point
+        // The first point in the input list is always added to the result list.
+        // This is done because there is no previous point to compare the first point against
         result.add(points.get(0));
 
         // Iterate over the points and add only if the current point is not equal to the previous one
@@ -293,17 +342,30 @@ public class TheShapeFixer {
     private List<Point2D> constructConvexHull(List<Point2D> points) {
         if (points.size() <= 1) return new ArrayList<>(points);
 
-        // Step 1: Find the point with the lowest y-coordinate (and leftmost in case of a tie)
+        // Step 1: Find the point with the lowest y-coordinate
+        //
+        // The point p0 is the starting point of the convex hull.
+        // The method searches for the point with the lowest y-coordinate (the bottom-most point).
+        // If two points have the same y-coordinate, the leftmost point (smallest x-coordinate) is chosen.
         Point2D p0 = points.get(0);
         for (Point2D p : points) {
             if (p.y < p0.y || (p.y == p0.y && p.x < p0.x)) {
                 p0 = p;
             }
         }
-
+        // This point will serve as the reference point
+        // for sorting other points by their polar angle relative to p0.
         final Point2D finalP0 = p0;
 
         // Step 2: Sort the points by the polar angle with respect to p0
+        //
+        // If two points are collinear (have the same polar angle),
+        // the closer one to p0 is placed first.
+        // This is done using the distanceSquared method to compare the distances between the points and p0.
+        //
+        // Otherwise, the points are sorted so that points with a counterclockwise orientation
+        // relative to p0 come before points with a clockwise orientation.
+        // This ensures that the convex hull is built in a counterclockwise order.
         points.sort((p1, p2) -> {
             if (p1.equals(finalP0)) return -1;
             if (p2.equals(finalP0)) return 1;
@@ -322,11 +384,20 @@ public class TheShapeFixer {
         });
 
         // Step 3: Build the convex hull using a stack
+        // The first two sorted points are added to the stack,
+        // which will hold the points that form the convex hull.
         Stack<Point2D> stack = new Stack<>();
         stack.push(points.get(0)); // Push the first point
         stack.push(points.get(1)); // Push the second point
 
         // Process the remaining points
+        //
+        // For each point, it checks the orientation of the last two points in the stack and the current point.
+        // If the orientation is not counterclockwise (i.e., if it forms a right turn or is collinear),
+        // the last point is removed from the stack.
+        //
+        // The process ensures that the points in the stack form a valid convex polygon in counterclockwise order.
+        // Only points that contribute to the outer boundary of the convex hull are kept.
         for (int i = 2; i < points.size(); i++) {
             Point2D top = stack.pop();
 
