@@ -28,14 +28,14 @@ public class Point2D {
     public int hashCode() {
         // return Objects.hash(x, y);
         // OR
-        // return hash = 31 * hash + point.hashCode();
+        // return 31 * x + y;
         // The manual hash code calculation using 31 can be more efficient in some cases,
         // especially when working with large lists.
         // The number 31 is often used in hash code implementations because it has certain mathematical properties
         // 1. The number 31 is prime, which helps in spreading out the generated hash codes more uniformly,
         // reducing the likelihood of collisions.
         // 2. In Java, multiplying by 31 can be optimized by the compiler into a bit shift and subtraction operation
-        // 31 * hash is equivalent to (hash << 5) - hash, which is faster to compute than a general multiplication.
+        // 31 * x is equivalent to (x << 5) - x, which is faster to compute than a general multiplication.
         return 31 * x + y;
 
     }

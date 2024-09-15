@@ -77,7 +77,7 @@ public class TheShapeFixer {
             }
         }
 
-        // Calculate the area of the shape to ensure it's not zero (i.e., the shape is not degenerate)
+        // Calculate the area of the shape to ensure it's not zero
         long area = calculateArea(points);
         if (area == 0) {
             return false; // Shape has zero area, invalid
@@ -100,13 +100,17 @@ public class TheShapeFixer {
         long area = 0;
         int n = points.size();
 
-        // Apply the Shoelace formula
+        // Apply the Shoelace formula (Gauss's area formula)
+        // The Shoelace formula works by calculating twice the signed area of the polygon.
+        // If the points are in counterclockwise order, the area will be positive,
+        // and if they are in clockwise order, the area will be negative.
         for (int i = 0; i < n - 1; i++) {
             area += (long) points.get(i).x * points.get(i + 1).y;
             area -= (long) points.get(i + 1).x * points.get(i).y;
         }
 
         // The area might be negative depending on the winding order; we can take the absolute value
+        // The caller of this method may later take the absolute value or divide by 2
         return area;
     }
 
@@ -142,7 +146,7 @@ public class TheShapeFixer {
             return true;
         }
 
-        // Special cases to handle colinear points
+        // Special cases to handle collinear points
         // (meaning the points lie on the same straight line)
         //
         // onSegment(p1, p2, q1) checks if the point q1 lies on the line segment p1-p2
@@ -177,7 +181,7 @@ public class TheShapeFixer {
         // Subtracting the two gives the signed area of the triangle.
         long val = (long) (q.y - p.y) * (r.x - q.x) - (long) (q.x - p.x) * (r.y - q.y);
 
-        if (val == 0) return 0; // Colinear
+        if (val == 0) return 0; // Collinear (the points that lie on the same straight line)
         return (val > 0) ? 1 : 2; // Clockwise if positive, counterclockwise if negative
     }
 

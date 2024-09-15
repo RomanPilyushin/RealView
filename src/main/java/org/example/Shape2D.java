@@ -46,7 +46,7 @@ public class Shape2D {
     public int hashCode() {
         // return Objects.hash(points);
         // OR
-        // return hash = 31 * hash + point.hashCode();
+        // Using 31
         // The manual hash code calculation using 31 can be more efficient in some cases,
         // especially when working with large lists.
         // The number 31 is often used in hash code implementations because it has certain mathematical properties
