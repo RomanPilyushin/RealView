@@ -48,25 +48,25 @@ public class TheShapeFixer {
         }
 
         // Check for self-intersecting edges by examining all pairs of edges
-        //Outer Loop (Iterating Through Edges)
+        // Outer Loop (Iterating Through Edges)
         for (int i = 0; i < n - 1; i++) {
-            //a1 and a2 represent the starting and ending points of the current edge
+            // a1 and a2 represent the starting and ending points of the current edge
             Point2D a1 = points.get(i);
             Point2D a2 = points.get(i + 1);
 
-            //Inner Loop (Comparing Current Edge with Others)
+            // Inner Loop (Comparing Current Edge with Others)
             for (int j = i + 1; j < n - 1; j++) {
-                //This avoids a situation where two edges that are adjacent might technically "intersect"
+                // This avoids a situation where two edges that are adjacent might technically "intersect"
                 // at a shared vertex, which is expected and not considered a self-intersection
                 //
-                //First condition - edge 1-2 doesn’t need to be checked against edge 2-3
-                //Second condition - skips the check for the case where the first edge and
+                // First condition - edge 1-2 doesn’t need to be checked against edge 2-3
+                // Second condition - skips the check for the case where the first edge and
                 // the last edge of a closed polygon share the same vertex (which they must).
                 if (Math.abs(i - j) <= 1 || (i == 0 && j == n - 2)) {
                     continue;
                 }
 
-                //b1 and b2 represent the starting and ending points of another edge
+                // b1 and b2 represent the starting and ending points of another edge
                 Point2D b1 = points.get(j);
                 Point2D b2 = points.get(j + 1);
 
@@ -145,7 +145,7 @@ public class TheShapeFixer {
         // Special cases to handle colinear points
         // (meaning the points lie on the same straight line)
         //
-        //onSegment(p1, p2, q1) checks if the point q1 lies on the line segment p1-p2
+        // onSegment(p1, p2, q1) checks if the point q1 lies on the line segment p1-p2
         // (i.e., q1 is collinear with p1 and p2 and also lies between them).
         if (o1 == 0 && onSegment(p1, p2, q1)) return true;
         if (o2 == 0 && onSegment(p1, p2, q2)) return true;
@@ -171,7 +171,7 @@ public class TheShapeFixer {
      */
     private int orientation(Point2D p, Point2D q, Point2D r) {
         // Calculate the determinant of the matrix formed by the points
-        //This expression is derived from the cross product of vectors pq and qr,
+        // This expression is derived from the cross product of vectors pq and qr,
         // which helps determine the orientation of the triplet (p,q,r)
         // The formula essentially represents the area of the triangle formed by these three points.
         // Subtracting the two gives the signed area of the triangle.
@@ -202,7 +202,7 @@ public class TheShapeFixer {
         // r.x = 2 lies between p.x = 1 and q.x = 4.
         // r.y = 3 lies between p.y = 2 and q.y = 5.
         //
-        //Since both conditions are true, r is on the segment between p and q, so the method returns true.
+        // Since both conditions are true, r is on the segment between p and q, so the method returns true.
         return r.x <= Math.max(p.x, q.x) && r.x >= Math.min(p.x, q.x) &&
                 r.y <= Math.max(p.y, q.y) && r.y >= Math.min(p.y, q.y);
     }
