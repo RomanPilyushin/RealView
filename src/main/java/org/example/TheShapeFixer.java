@@ -101,6 +101,8 @@ public class TheShapeFixer {
         int n = points.size();
 
         // Apply the Shoelace formula (Gauss's area formula)
+        // https://www.wikiwand.com/en/articles/Shoelace_formula
+        //
         // The Shoelace formula works by calculating twice the signed area of the polygon.
         // If the points are in counterclockwise order, the area will be positive,
         // and if they are in clockwise order, the area will be negative.
@@ -179,6 +181,7 @@ public class TheShapeFixer {
         // which helps determine the orientation of the triplet (p,q,r)
         // The formula essentially represents the area of the triangle formed by these three points.
         // Subtracting the two gives the signed area of the triangle.
+        // https://personal.utdallas.edu/~daescu/convexhull.pdf
         long val = (long) (q.y - p.y) * (r.x - q.x) - (long) (q.x - p.x) * (r.y - q.y);
 
         if (val == 0) return 0; // Collinear (the points that lie on the same straight line)
@@ -345,7 +348,9 @@ public class TheShapeFixer {
      */
     private List<Point2D> constructConvexHull(List<Point2D> points) {
         if (points.size() <= 1) return new ArrayList<>(points);
-
+        // Graham's scan algorithm
+        //https://www.youtube.com/watch?v=SBdWdT_5isI
+        //
         // Step 1: Find the point with the lowest y-coordinate
         //
         // The point p0 is the starting point of the convex hull.
