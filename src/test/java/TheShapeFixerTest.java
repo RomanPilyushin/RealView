@@ -4,6 +4,7 @@ import org.example.TheShapeFixer;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
+import java.util.List;
 
 class TheShapeFixerTest {
 
@@ -20,6 +21,30 @@ class TheShapeFixerTest {
         ));
 
         assertTrue(shapeFixer.isValid(validShape), "The shape should be valid");
+    }
+
+    @Test
+    public void testComplexSelfIntersectingShape() {
+        List<Point2D> points = Arrays.asList(
+                new Point2D(0, 0), new Point2D(2, 0),
+                new Point2D(4, 0), new Point2D(4, 2),
+                new Point2D(2, 2), new Point2D(2, 1),
+                new Point2D(2, 4), new Point2D(0, 4),
+                new Point2D(0, 0)
+        );
+
+        Shape2D shape = new Shape2D(points);
+        TheShapeFixer fixer = new TheShapeFixer();
+
+        Shape2D expectedShape = new Shape2D(Arrays.asList(
+                new Point2D(0, 0), new Point2D(2, 0),
+                new Point2D(4, 0), new Point2D(4, 2),
+                new Point2D(2, 2), new Point2D(2, 4),
+                new Point2D(0, 4), new Point2D(0, 0)
+        ));
+
+        Shape2D repairedShape = fixer.repair(shape);
+        assertEquals(expectedShape, repairedShape, "The repaired shape should match the expected shape");
     }
 
     @Test

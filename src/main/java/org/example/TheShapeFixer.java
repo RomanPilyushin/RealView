@@ -230,86 +230,210 @@ public class TheShapeFixer {
      */
 
     public Shape2D repair(Shape2D shape) {
+        // Step 1: Create a mutable list of points from the input shape
         List<Point2D> points = new ArrayList<>(shape.getPoints());
 
-        // Ensure the shape is closed by adding the starting point at the end if it's not already closed
-        if (points.size() >= 1 && !points.get(0).equals(points.get(points.size() - 1))) {
+        // Step 2: Ensure the shape is closed
+        // If the first and last points are not the same, add the first point to the end
+        if (!points.isEmpty() && !points.get(0).equals(points.get(points.size() - 1))) {
             points.add(points.get(0));
         }
 
-        // Remove consecutive duplicate points to simplify the shape
+        // Step 3: Remove consecutive duplicate points
+        // This simplifies the shape and avoids zero-length edges
         points = removeConsecutiveDuplicates(points);
 
-        // If there are not enough points to form a polygon, return an empty shape
+        // Step 4: Check if the shape has enough points to form a polygon
+        // A valid polygon must have at least 3 distinct points (plus the closing point)
         if (points.size() < 4) {
-            return new Shape2D();
+            return new Shape2D(); // Not enough points to form a valid shape
         }
 
-        // Remove any repeated points (excluding the first and last point for closure)
+        // Step 5: Remove non-consecutive duplicate points (excluding the closing point)
+        // This ensures all points (except the closing point) are unique
         Set<Point2D> uniquePoints = new HashSet<>(points.subList(0, points.size() - 1));
-
-        // If duplicates are found, attempt to remove them
-        // it means there were duplicates in the list (other than the closing point).
         if (uniquePoints.size() != points.size() - 1) {
-            //This will store the final list of unique points,
-            // in the same order they appear in the original list.
+            // There are duplicate points; remove them
             List<Point2D> fixedPoints = new ArrayList<>();
-            // HashSet to track which points have already been added to fixedPoints.
-            // This prevents adding a duplicate point again
-            Set<Point2D> seen = new HashSet<>();
-
-            // Collect unique points
-            //
-            // The loop iterates through all points (except the closing point),
-            // and for each point p, it checks if p has already been added to seen.
-            // If p has not been seen before, it is added to both fixedPoints and seen.
+            Set<Point2D> seenPoints = new HashSet<>();
             for (int i = 0; i < points.size() - 1; i++) {
                 Point2D p = points.get(i);
-                if (!seen.contains(p)) {
-                    fixedPoints.add(p);
-                    seen.add(p);
+                if (seenPoints.add(p)) {
+                    fixedPoints.add(p); // Add unique points
                 }
             }
-
-            // Ensure there are enough points to form a valid shape
             if (fixedPoints.size() >= 3) {
-                // Close the shape
-                // If there are enough points,
-                // the first point is added to the end of fixedPoints to close the shape.
+                // Close the shape by adding the first point at the end
                 fixedPoints.add(fixedPoints.get(0));
-                points = fixedPoints;
+                points = fixedPoints; // Update the points list
             } else {
-                // Not enough points to form a valid shape
-                return new Shape2D();
+                return new Shape2D(); // Not enough points to form a polygon
             }
         }
 
-        // Attempt to validate the repaired shape
+        // Step 6: Attempt to fix self-intersections
+        boolean shapeChanged = true; // Flag to track if changes are made
+        while (!isValid(new Shape2D(points)) && shapeChanged) {
+            // Try to resolve intersections
+            shapeChanged = resolveIntersections(points);
+        }
+
+        // Step 7: Final validation
+        // Check if the shape is now valid after resolving intersections
         Shape2D repairedShape = new Shape2D(points);
         if (isValid(repairedShape)) {
-            return repairedShape;
+            return repairedShape; // Return the repaired shape if valid
         }
 
-        // As a last resort, construct the convex hull of the unique points
-        // The convex hull is the smallest convex shape that can enclose all the points of the original shape
-        List<Point2D> hull = constructConvexHull(new ArrayList<>(uniquePoints));
+        // Step 8: Construct the convex hull as a last resort
+        // The convex hull is the smallest convex polygon that contains all the points
+        List<Point2D> hullPoints = constructConvexHull(new ArrayList<>(uniquePoints));
 
-        // If the hull forms a valid shape, return it
-        if (hull.size() >= 3) {
-            // Ensure the hull is closed
-            if (!hull.get(0).equals(hull.get(hull.size() - 1))) {
-                hull.add(hull.get(0));
+        // Ensure the convex hull is closed
+        if (hullPoints.size() >= 3) {
+            if (!hullPoints.get(0).equals(hullPoints.get(hullPoints.size() - 1))) {
+                hullPoints.add(hullPoints.get(0));
             }
-            repairedShape = new Shape2D(hull);
+            repairedShape = new Shape2D(hullPoints);
             if (isValid(repairedShape)) {
-                return repairedShape;
+                return repairedShape; // Return the convex hull if valid
             }
         }
 
-        // Cannot repair the shape, return an empty shape
+        // Step 9: Unable to repair
+        // Return an empty shape indicating that the shape cannot be repaired
         return new Shape2D();
     }
 
+    /**
+     * Attempts to resolve any self-intersections in the shape by removing problematic points.
+     *
+     * @param points The list of points representing the shape.
+     * @return {@code true} if the shape was changed; {@code false} otherwise.
+     */
+    private boolean resolveIntersections(List<Point2D> points) {
+        int n = points.size();
+        // Iterate over all pairs of edges to find intersections
+        for (int i = 0; i < n - 1; i++) {
+            Point2D a1 = points.get(i);       // Start point of edge A
+            Point2D a2 = points.get(i + 1);   // End point of edge A
+
+            for (int j = 0; j < n - 1; j++) {
+                // Skip adjacent edges and edges that share endpoints
+                if (Math.abs(i - j) <= 1 || (i == 0 && j == n - 2)) {
+                    continue;
+                }
+                Point2D b1 = points.get(j);       // Start point of edge B
+                Point2D b2 = points.get(j + 1);   // End point of edge B
+
+                // Check if edges A and B intersect
+                if (edgesIntersect(a1, a2, b1, b2)) {
+                    // Intersection detected between edges (a1, a2) and (b1, b2)
+                    // Attempt to resolve the intersection
+                    if (attemptToResolveIntersection(points, i, j)) {
+                        // Intersection resolved by removing point(s)
+                        return true; // Indicate that the shape has changed
+                    }
+                }
+            }
+        }
+        return false; // No intersections resolved in this iteration
+    }
+
+    /**
+     * Attempts to resolve a specific intersection by removing points involved in the intersection,
+     * first individually and then in pairs.
+     *
+     * @param points The list of points representing the shape.
+     * @param i Index of the first edge's starting point.
+     * @param j Index of the second edge's starting point.
+     * @return {@code true} if the intersection was resolved; {@code false} otherwise.
+     */
+    private boolean attemptToResolveIntersection(List<Point2D> points, int i, int j) {
+        int n = points.size();
+        // Indices of points involved in the intersection
+        List<Integer> indicesOfIntersection = Arrays.asList(i, i + 1, j, j + 1);
+        List<Shape2D> validShapes = new ArrayList<>();
+
+        // First, try removing one point at a time
+        for (int idx : indicesOfIntersection) {
+            if (idx >= n - 1) {
+                continue; // Skip the closing point
+            }
+            // Create a new list of points without the point at intersection (idx)
+            List<Point2D> testPoints = new ArrayList<>(points);
+            testPoints.remove(idx);
+            Shape2D testShape = new Shape2D(testPoints);
+
+            // Check if the new shape is valid
+            if (isValid(testShape)) {
+                validShapes.add(testShape); // Add to valid shapes
+            }
+        }
+        if (!validShapes.isEmpty()) {
+            // Select the valid shape with the largest area
+            Shape2D bestShape = selectShapeWithLargestArea(validShapes);
+            // Update the original points with the best shape found
+            points.clear();
+            points.addAll(bestShape.getPoints());
+            return true; // Intersection resolved
+        }
+
+        // If single point removal doesn't work, try removing pairs of points
+        for (int idx1 = 0; idx1 < indicesOfIntersection.size(); idx1++) {
+            for (int idx2 = idx1 + 1; idx2 < indicesOfIntersection.size(); idx2++) {
+                int index1 = indicesOfIntersection.get(idx1);
+                int index2 = indicesOfIntersection.get(idx2);
+                if (index1 >= n - 1 || index2 >= n - 1) {
+                    continue; // Skip the closing point
+                }
+                // Create a new list without the two points
+                List<Point2D> testPoints = new ArrayList<>(points);
+                // Remove points in descending order to maintain correct indices
+                int removeIdx1 = Math.max(index1, index2);
+                int removeIdx2 = Math.min(index1, index2);
+                testPoints.remove(removeIdx1);
+                testPoints.remove(removeIdx2);
+                Shape2D testShape = new Shape2D(testPoints);
+
+                // Check if the new shape is valid
+                if (isValid(testShape)) {
+                    validShapes.add(testShape); // Add to valid shapes
+                }
+            }
+        }
+        if (!validShapes.isEmpty()) {
+            // Select the valid shape with the largest area
+            Shape2D bestShape = selectShapeWithLargestArea(validShapes);
+            // Update the original points with the best shape found
+            points.clear();
+            points.addAll(bestShape.getPoints());
+            return true; // Intersection resolved
+        }
+
+        // Unable to resolve the intersection by removing involved points
+        return false;
+    }
+
+    /**
+     * Selects the shape with the largest area from a list of valid shapes,
+     * ensuring we preserve as much of the original shape as possible.
+     *
+     * @param shapes The list of valid shapes to choose from.
+     * @return The shape with the largest area.
+     */
+    private Shape2D selectShapeWithLargestArea(List<Shape2D> shapes) {
+        Shape2D bestShape = shapes.get(0);
+        long maxArea = Math.abs(calculateArea(bestShape.getPoints()));
+        for (Shape2D shape : shapes) {
+            long area = Math.abs(calculateArea(shape.getPoints()));
+            if (area > maxArea) {
+                bestShape = shape;
+                maxArea = area;
+            }
+        }
+        return bestShape;
+    }
 
     /**
      * Removes consecutive duplicate points from a list of points.
