@@ -319,7 +319,8 @@ public class TheShapeFixer {
             Point2D a2 = points.get(i + 1);   // End point of edge A
 
             for (int j = 0; j < n - 1; j++) {
-                // Skip adjacent edges and edges that share endpoints
+                // Skip adjacent edges (edges that share a common vertex)
+                // and edges that share endpoints
                 if (Math.abs(i - j) <= 1 || (i == 0 && j == n - 2)) {
                     continue;
                 }
